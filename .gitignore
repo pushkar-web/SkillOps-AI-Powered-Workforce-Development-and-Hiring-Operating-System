@@ -1,0 +1,48 @@
+# Maven and Gradle build outputs
+target/
+build/
+bin/
+out/
+
+# Logging
+logs/
+*.log
+
+# IDE & Editor configurations
+.idea/
+*.iml
+.classpath
+.project
+.settings/
+.vscode/
+
+# Operating system files
+.DS_Store
+Thumbs.db
+
+# Java bytecode
+*.class
+
+# Environment secrets and local overrides
+.env
+.env.*
+application-local.yml
+application-local.properties
+
+# Binary package artifacts
+*.jar
+*.war
+*.ear
+*.nar
+*.zip
+*.tar.gz
+*.rar
+
+# Ensure distribution helper scripts and documentations are retained
+!dist/jar/README.md
+!dist/jar/run-jar.bat
+!dist/jar/run-jar.ps1
+!dist/war/README.md
+!dist/war/run-war.bat
+!dist/war/run-war.ps1
+
