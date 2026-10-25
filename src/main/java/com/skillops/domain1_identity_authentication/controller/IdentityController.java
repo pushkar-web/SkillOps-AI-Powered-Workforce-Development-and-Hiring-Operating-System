@@ -73,9 +73,9 @@ public class IdentityController {
         this.auditLogRepository = auditLogRepository;
     }
 
-    @GetMapping("/health")
-    @Operation(summary = "GET health / row counts")
-    public ResponseEntity<Map<String, Object>> health() {
+    @GetMapping("/identity-domain/summary")
+    @Operation(summary = "GET identity domain summary / row counts")
+    public ResponseEntity<Map<String, Object>> summary() {
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("status", "UP");
         body.put("domain", OpenApiConfig.DOMAIN_1);
