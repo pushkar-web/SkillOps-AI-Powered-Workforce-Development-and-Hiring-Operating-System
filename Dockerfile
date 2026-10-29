@@ -47,9 +47,9 @@ RUN chown -R skillops:skillops /app
 
 USER skillops
 
-# Render injects the PORT env var; Spring Boot reads server.port
-ENV SERVER_PORT=8080
-EXPOSE 8080
+# Render injects PORT=10000 by default for web services
+ENV PORT=10000
+EXPOSE 10000 8080
 
 # JVM tuning for containerized environments
 ENV JAVA_OPTS="-XX:+UseContainerSupport \

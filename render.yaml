@@ -48,6 +48,10 @@ services:
           name: skillops-db
           property: password
 
+      # ── Server Port (Render uses 10000) ──
+      - key: PORT
+        value: "10000"
+
       # ── JPA / Hibernate ──
       - key: SPRING_JPA_HIBERNATE_DDL_AUTO
         value: none

@@ -1,9 +1,6 @@
 #!/bin/sh
 # ============================================================
 # render-start.sh — Render startup script
-# 1. Converts Render's postgres:// URLs to Spring Boot JDBC format
-# 2. Automatically initializes the 62 database tables on first boot
-# 3. Launches the Spring Boot application
 # ============================================================
 
 set -e
@@ -30,31 +27,32 @@ if [ -n "$RAW_URL" ] && echo "$RAW_URL" | grep -qE '^postgres(ql)?://'; then
     echo "   JDBC URL: $SPRING_DATASOURCE_URL"
     echo "   User:     $SPRING_DATASOURCE_USERNAME"
 
-    # ── Auto-Initialize Database Schema (Zero manual steps required) ──
+    # ── Check if tables are already initialized ──
     if command -v psql >/dev/null 2>&1; then
-        echo "⏳ Checking database connectivity..."
-        MAX_RETRIES=15
-        COUNT=0
-        until psql "$RAW_URL" -c "SELECT 1;" >/dev/null 2>&1 || [ $COUNT -eq $MAX_RETRIES ]; do
-            sleep 2
-            COUNT=$((COUNT + 1))
-        done
-
-        if psql "$RAW_URL" -c "SELECT 1 FROM roles LIMIT 1;" >/dev/null 2>&1; then
-            echo "✅ SkillOps database schemas already initialized."
+        echo "⏳ Checking database schemas..."
+        # Check information_schema for 'roles' table in ANY schema
+        if psql "$RAW_URL" -t -c "SELECT 1 FROM information_schema.tables WHERE table_name = 'roles' LIMIT 1;" 2>/dev/null | grep -q 1; then
+            echo "✅ SkillOps database schemas already initialized. Skipping SQL migration."
         else
-            echo "🌱 First boot: Auto-initializing 62 tables and seed data across 10 schemas..."
+            echo "🌱 Initializing SkillOps database (first boot)..."
             psql "$RAW_URL" -f database/identity_authentication.sql || true
             psql "$RAW_URL" -f database/domain1_to_5_schemas.sql || true
             psql "$RAW_URL" -f database/domain6_to_10_schemas.sql || true
             psql "$RAW_URL" -f database/seed_large_dataset.sql || true
-            echo "🎉 Database successfully populated with 62 tables and seed data!"
+            echo "🎉 Database schemas and seed data ready!"
         fi
     fi
 fi
 
-# Launch the Spring Boot application
-echo "🚀 Starting SkillOps application on port ${PORT:-8080}..."
+# Ensure port is set (Render defaults to 10000)
+APP_PORT="${PORT:-10000}"
+
+echo "🚀 Starting SkillOps application on 0.0.0.0:${APP_PORT}..."
+
+# Launch Spring Boot with explicit port and 0.0.0.0 binding
 exec java $JAVA_OPTS \
-    -Dserver.port="${PORT:-8080}" \
-    -jar app.jar
+    -Dserver.port="${APP_PORT}" \
+    -Dserver.address=0.0.0.0 \
+    -jar app.jar \
+    --server.port="${APP_PORT}" \
+    --server.address=0.0.0.0
