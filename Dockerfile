@@ -26,6 +26,9 @@ FROM eclipse-temurin:21-jre-alpine AS runtime
 
 WORKDIR /app
 
+# Install postgresql-client for automatic schema initialization on container boot
+RUN apk add --no-cache postgresql-client
+
 # Create non-root user for security
 RUN addgroup -S skillops && adduser -S skillops -G skillops
 
