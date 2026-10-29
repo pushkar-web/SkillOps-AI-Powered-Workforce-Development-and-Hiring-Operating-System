@@ -1,0 +1,48 @@
+# ============================================================
+# docker-compose.yml — Local Docker Testing for SkillOps
+# Matches Render production environment configuration
+# ============================================================
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: skillops-db
+    environment:
+      POSTGRES_DB: skillops
+      POSTGRES_USER: skillops_user
+      POSTGRES_PASSWORD: skillops_secure_password_123
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./database/identity_authentication.sql:/docker-entrypoint-initdb.d/01_identity.sql
+      - ./database/domain1_to_5_schemas.sql:/docker-entrypoint-initdb.d/02_domain1_to_5.sql
+      - ./database/domain6_to_10_schemas.sql:/docker-entrypoint-initdb.d/03_domain6_to_10.sql
+      - ./database/seed_large_dataset.sql:/docker-entrypoint-initdb.d/04_seed.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U skillops_user -d skillops"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: skillops-api
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/skillops
+      SPRING_DATASOURCE_USERNAME: skillops_user
+      SPRING_DATASOURCE_PASSWORD: skillops_secure_password_123
+      PORT: 8080
+      SPRING_JPA_HIBERNATE_DDL_AUTO: none
+      SPRING_JPA_SHOW_SQL: "true"
+
+volumes:
+  pgdata:
+

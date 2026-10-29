@@ -1,0 +1,32 @@
+# Build artifacts
+build/
+target/
+dist/
+
+# IDE files
+.idea/
+.vscode/
+*.iml
+
+# Git
+.git/
+.gitignore
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Docs and scripts (not needed at runtime)
+docs/
+scripts/
+*.md
+!README.md
+
+# Logs
+logs/
+*.log
+
+# Local env files
+.env
+.env.local
+
